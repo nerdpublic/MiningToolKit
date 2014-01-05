@@ -118,7 +118,7 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 					//logToTextFile(player+" Dissolving "+block+" @ Location: "+block.getLocation()+" Should drop: "+items);
 					if (miningInventory.addItems(player, "", items)){
 						block.setType(Material.AIR);
-					}
+					} 
 				}
 			}
 		}

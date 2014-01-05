@@ -38,6 +38,46 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public final class MiningToolKit extends JavaPlugin implements Listener{
+	public MiningInventory miningInventory = new MiningInventory(this);
+	public Map<String, Boolean> enableToTheSky = new HashMap<String, Boolean>();
+	public Map<String, Integer> Autominer_Distance = new HashMap<String, Integer>();
+	public Map<String, Integer> Autolighter_Intensity = new HashMap<String, Integer>();
+	public Queue<NanoDissolver> Dissolvers = new LinkedList<NanoDissolver>();
+	public Queue<BlockToDissolve> DissolveBlocks = new PriorityQueue<BlockToDissolve>(10, new Comparator<BlockToDissolve>() {
+		public int compare(BlockToDissolve block1, BlockToDissolve block2) {
+			if (block1.distance < block2.distance)
+			{
+				return -1;
+			}
+			if (block1.distance > block2.distance)
+			{
+				return 1;
+			}
+			return 0;
+		}});
+
+	final HashSet<Material> ignoreblocks=new HashSet<Material>( Arrays.asList(
+			Material.AIR,
+			Material.ANVIL,
+			Material.BED,
+			Material.BEDROCK,
+			Material.BOOKSHELF,
+			Material.BURNING_FURNACE,
+			Material.CHEST,
+			Material.DISPENSER,
+			Material.DROPPER,
+			Material.ENCHANTMENT_TABLE,
+			Material.ENDER_CHEST,
+			Material.ENDER_PORTAL,
+			Material.ENDER_PORTAL_FRAME,
+			Material.FURNACE,
+			Material.HOPPER,
+			Material.MOB_SPAWNER,
+			Material.TORCH,
+			Material.TRAPPED_CHEST,
+			Material.WORKBENCH,
+			Material.WALL_SIGN
+			));
 	public void logToTextFile(String aString){
 		try {
 			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("c:\\Temp\\JavaLog.txt", true)));
@@ -74,29 +114,11 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 		public void doDissolve(){
 			if (block != null){
 				if (!ignoreblocks.contains(block.getType())) {
-					List<Inventory> collection=miningInventory.get(player.getName());
-					if (collection==null){
-						collection=new ArrayList<Inventory>();
-						miningInventory.put(player.getName(), collection);
-					}
 					Collection<ItemStack> items=block.getDrops();
-					logToTextFile(player+" Dissolving "+block+" @ Location: "+block.getLocation()+" Should drop: "+items);
-					HashMap<Integer,ItemStack> remainingItems=new HashMap<Integer,ItemStack>();
-
-					if (!items.isEmpty()){
-						for (Inventory inventory : collection) {
-							remainingItems=inventory.addItem(items.toArray(new ItemStack[items.size()]));
-							items=remainingItems.values();
-							if (items.isEmpty())
-								break;
-						}
-						if (!items.isEmpty()){
-							Inventory inventory=getServer().createInventory(player, 54 /*9*9*9*9*/);
-							collection.add(inventory);
-							inventory.addItem(items.toArray(new ItemStack[items.size()]));
-						}
+					//logToTextFile(player+" Dissolving "+block+" @ Location: "+block.getLocation()+" Should drop: "+items);
+					if (miningInventory.addItems(player, "", items)){
+						block.setType(Material.AIR);
 					}
-					block.setType(Material.AIR);
 				}
 			}
 		}
@@ -167,46 +189,6 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 			return (yPoint>yStop);
 		}
 	}
-	public Map<String, Boolean> enableToTheSky = new HashMap<String, Boolean>();
-	public Map<String, Integer> Autominer_Distance = new HashMap<String, Integer>();
-	public Map<String, Integer> Autolighter_Intensity = new HashMap<String, Integer>();
-	public Map<String, List<Inventory>> miningInventory = new HashMap<String, List<Inventory>>();
-	public Queue<NanoDissolver> Dissolvers = new LinkedList<NanoDissolver>();
-	public Queue<BlockToDissolve> DissolveBlocks = new PriorityQueue<BlockToDissolve>(10, new Comparator<BlockToDissolve>() {
-		public int compare(BlockToDissolve block1, BlockToDissolve block2) {
-			if (block1.distance < block2.distance)
-			{
-				return -1;
-			}
-			if (block1.distance > block2.distance)
-			{
-				return 1;
-			}
-			return 0;
-		}});
-
-	final HashSet<Material> ignoreblocks=new HashSet<Material>( Arrays.asList(
-			Material.AIR,
-			Material.ANVIL,
-			Material.BED,
-			Material.BEDROCK,
-			Material.BOOKSHELF,
-			Material.BURNING_FURNACE,
-			Material.CHEST,
-			Material.DISPENSER,
-			Material.DROPPER,
-			Material.ENCHANTMENT_TABLE,
-			Material.ENDER_CHEST,
-			Material.ENDER_PORTAL,
-			Material.ENDER_PORTAL_FRAME,
-			Material.FURNACE,
-			Material.HOPPER,
-			Material.MOB_SPAWNER,
-			Material.TORCH,
-			Material.TRAPPED_CHEST,
-			Material.WORKBENCH,
-			Material.WALL_SIGN
-			));
 
 	public void onEnable(){
 		getLogger().info("onEnable has been invoked!");
@@ -370,54 +352,7 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 				getLogger().info("current "+currentLocation);
 				player.teleport(currentLocation, TeleportCause.COMMAND);
 			}else if (cmd.getName().equalsIgnoreCase("mininginventory") || cmd.getName().equalsIgnoreCase("mi")){
-				int miningInventoryCount=0;
-				List<Inventory> playerMiningInventory=miningInventory.get(player.getName()); 
-				if (playerMiningInventory!=null){
-					miningInventoryCount=playerMiningInventory.size();
-					if (miningInventoryCount==0){
-						player.sendMessage("No miningInventory(s) availible!");
-					}else if ((args.length>0) && isInteger(args[0])){
-						if (args[0].equalsIgnoreCase("drop")){
-							Location dropLocation=player.getLocation();
-							World world=dropLocation.getWorld();
-							for (Inventory inventory:playerMiningInventory){
-								for (ItemStack item:inventory){
-									world.dropItemNaturally(dropLocation, item);
-								}
-							}
-							playerMiningInventory.clear();
-						}else if (args[0].equalsIgnoreCase("share")){
-							int sharedMiningInventoryCount=0;
-							List<Inventory> sharedMiningInventory=miningInventory.get("_share_"); 
-							if (sharedMiningInventory!=null){
-								miningInventoryCount=sharedMiningInventory.size();
-							}
-								if (sharedMiningInventoryCount==0){
-									player.sendMessage("No shared miningInventory(s) availible!");
-							Integer selectedIndex=0; 
-							if (args.length > 0){
-								selectedIndex=Integer.parseInt(args[0])-1;
-							}
-							if ((selectedIndex>=0) && (selectedIndex<sharedMiningInventoryCount)){
-								player.openInventory(sharedMiningInventory.get(selectedIndex));
-							}else{
-								player.sendMessage((selectedIndex+1)+" is not a valid shared miningInventory. Please specify 1 to "+sharedMiningInventoryCount+" to open!");
-							}
-						}
-					}else if ((args.length==0) && (miningInventoryCount>1)){
-						player.sendMessage(miningInventoryCount+" miningInventory(s) availible. Please specify which to open!");
-					} else {
-						Integer selectedIndex=0; 
-						if (args.length > 0){
-							selectedIndex=Integer.parseInt(args[0])-1;
-						}
-						if ((selectedIndex>=0) && (selectedIndex<miningInventoryCount)){
-							player.openInventory(playerMiningInventory.get(selectedIndex));
-						}else{
-							player.sendMessage((selectedIndex+1)+" is not a valid miningInventory. Please specify 1 to "+miningInventoryCount+" to open!");
-						}
-					}
-				}
+				return miningInventory.processCommandMiningInventory(player, args);
 			}
 
 			return false;
@@ -609,8 +544,10 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 						}
 					}
 					Block[] blockAry = blocks.toArray(new Block[0]);
-					int rndBlock=(int)(Math.random()*blockAry.length);
-					blockAry[rndBlock].setType(Material.TORCH);
+					if (blockAry.length>0){
+						int rndBlock=(int)(Math.random()*blockAry.length);
+						blockAry[rndBlock].setType(Material.TORCH);
+					}
 				}
 
 			}

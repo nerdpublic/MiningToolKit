@@ -107,7 +107,7 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 			player=aPlayer;
 			block=aBlock;
 			distance=Math.round(aDistance);
-		} 
+		}
 		Block block;
 		Player player;
 		long distance;

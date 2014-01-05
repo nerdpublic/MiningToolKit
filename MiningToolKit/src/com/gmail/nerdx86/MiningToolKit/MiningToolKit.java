@@ -194,7 +194,7 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 		getLogger().info("onEnable has been invoked!");
 		PluginManager PluginManager = getServer().getPluginManager();
 		PluginManager.registerEvents(this, this);
-		try{
+		/*try{
 			String path = getDataFolder() + File.separator + "miningInventory.bin";
 			File file = new File(path);
 
@@ -204,18 +204,18 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 		}catch(Exception e){
 			//handle the exception
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public void onDisable(){
 		getLogger().info("onDisable has been invoked!");
 		try{
-			String path = getDataFolder() + File.separator + "miningInventory.bin";
+			//String path = getDataFolder() + File.separator + "miningInventory.bin";
 			  // if the directory does not exist, create it
 			  if (!getDataFolder().exists()) {
 			    getDataFolder().mkdir();  
 		     }
-			SLAPI.save(miningInventory,path);
+			//SLAPI.save(miningInventory,path);
 		}catch(Exception e){
 			e.printStackTrace();
 		}

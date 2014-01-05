@@ -1,0 +1,40 @@
+    name: TestPlugin
+    main: com.gmail.nerdx86.TestPlugin.TestPlugin
+    version: 0.0.1
+    commands:
+      autominer:
+        description: This is a demo command.
+        usage: /<command> [player]
+        permission: <plugin name>.autominer
+        permission-message: You don't have <permission>
+      autolighter:
+        description: This is a demo command.
+        usage: /<command> [player]
+        permission: <plugin name>.autolighter
+        permission-message: You don't have <permission>
+      nanodissolve:
+        description: This is a demo command.
+        usage: /<command> [player]
+        permission: <plugin name>.nanodissolve
+        permission-message: You don't have <permission>        
+      tothesky:
+        description: This is a demo command.
+        usage: /<command> [player]
+        permission: <plugin name>.tothesky
+        permission-message: You don't have <permission>
+      makealake:
+        description: This is a demo command.
+        usage: /<command> [player]
+        permission: <plugin name>.makealake
+        permission-message: You don't have <permission>
+      tothere:
+        description: This is a demo command.
+        usage: /<command> [player]
+        permission: <plugin name>.tothere
+        permission-message: You don't have <permission>
+      mininginventory:
+        description: This is a demo command.
+        usage: /<command> [player]
+        permission: <plugin name>.mininginventory
+        permission-message: You don't have <permission>
+      

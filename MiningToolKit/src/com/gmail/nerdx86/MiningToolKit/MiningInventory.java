@@ -15,10 +15,12 @@ import org.bukkit.inventory.ItemStack;
 
 public class MiningInventory extends ToolBaseObject{
 	public Map<String, List<Inventory>> inventoryMap = new HashMap<String, List<Inventory>>();
-	public MiningToolKit plugin;
-	public MiningInventory(MiningToolKit aPlugin){
-		plugin=aPlugin;
+	public MiningInventory(MiningToolKit aPlugin) {
+		super(aPlugin);
+		// TODO Auto-generated constructor stub
 	}
+
+ 
 	public boolean processCommandMiningInventory( Player aPlayer, String[] args){
 		String inventoryName="";
 		String inventoryKey="";

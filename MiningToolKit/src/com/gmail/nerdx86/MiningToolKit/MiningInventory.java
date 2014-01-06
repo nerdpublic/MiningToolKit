@@ -28,7 +28,7 @@ public class MiningInventory extends ToolBaseObject{
 		String inventoryName="";
 		String inventoryKey="";
 		int firstArg=0;
-		if ((args.length>0) && args[0].equalsIgnoreCase("classify")){
+		if ((args.length>0) && (args[0].equalsIgnoreCase("classify")||args[0].equalsIgnoreCase("cls"))){
 			return plugin.blockDissolver.processCommandClassify(aPlayer, args);
 		}
 		if ((args.length>firstArg) && args[firstArg].equalsIgnoreCase("shared")){

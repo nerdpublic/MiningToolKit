@@ -114,21 +114,21 @@ public class BlockDissolver extends ToolBaseObject{
 			aPlayer.sendMessage(" Dispose");
 			return true;
 		}
-		
+
 		HashSet<Material> selectedClassification=null;
 		List<HashSet<Material>> nonselectedClassifications=new ArrayList<HashSet<Material>>();
-		
+
 		nonselectedClassifications.add(getIgnoreBlocks(aPlayer));
 		nonselectedClassifications.add(getDisposeBlocks(aPlayer));
 		nonselectedClassifications.add(getSurplusBlocks(aPlayer));
 		nonselectedClassifications.add(getPriorityBlocks(aPlayer));
-		if ((args.length>1) && args[1].equalsIgnoreCase("ignore")){
+		if ((args.length>1) && (args[1].equalsIgnoreCase("ignore")||args[1].equalsIgnoreCase("i"))){
 			selectedClassification=getIgnoreBlocks(aPlayer);
-		}else if ((args.length>1) && args[1].equalsIgnoreCase("dispose")){
+		}else if ((args.length>1) && (args[1].equalsIgnoreCase("dispose")||args[1].equalsIgnoreCase("d"))){
 			selectedClassification=getDisposeBlocks(aPlayer);
-		}else if ((args.length>1) && args[1].equalsIgnoreCase("surplus")){
+		}else if ((args.length>1) && (args[1].equalsIgnoreCase("surplus")||args[1].equalsIgnoreCase("s"))){
 			selectedClassification=getSurplusBlocks(aPlayer);
-		}else if ((args.length>1) && args[1].equalsIgnoreCase("priority")){
+		}else if ((args.length>1) && (args[1].equalsIgnoreCase("priority")||args[1].equalsIgnoreCase("p"))){
 			selectedClassification=getPriorityBlocks(aPlayer);
 		}else{
 			aPlayer.sendMessage("unknown class: "+args[1]);
@@ -141,7 +141,7 @@ public class BlockDissolver extends ToolBaseObject{
 			for (Material material:selectedClassification){
 				aPlayer.sendMessage(" "+material);
 			}
-		}else if ((args.length>2) && args[2].equalsIgnoreCase("add")){
+		}else if ((args.length>2) && (args[2].equalsIgnoreCase("add") || args[2].equalsIgnoreCase("a"))){
 			if (args.length==3){
 				aPlayer.sendMessage("What do you want to add?");
 				return true;
@@ -155,8 +155,12 @@ public class BlockDissolver extends ToolBaseObject{
 					classification.remove(materialToAdd);
 				}
 			}
+			aPlayer.sendMessage(args[1]+":");
+			for (Material material:selectedClassification){
+				aPlayer.sendMessage(" "+material);
+			}
 			return true;
-		}else if ((args.length>2) && args[2].equalsIgnoreCase("remove")){
+		}else if ((args.length>2) && (args[2].equalsIgnoreCase("remove") || args[2].equalsIgnoreCase("r"))){
 			if (args.length==3){
 				aPlayer.sendMessage("What do you want to remove?");
 				return true;
@@ -166,6 +170,10 @@ public class BlockDissolver extends ToolBaseObject{
 				aPlayer.sendMessage(args[3]+" is not a valid material");
 			}else{
 				selectedClassification.remove(materialToRemove);
+			}
+			aPlayer.sendMessage(args[1]+":");
+			for (Material material:selectedClassification){
+				aPlayer.sendMessage(" "+material);
 			}
 			return true;
 		}

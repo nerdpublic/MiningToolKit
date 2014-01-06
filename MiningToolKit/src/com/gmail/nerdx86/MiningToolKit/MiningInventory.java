@@ -3,11 +3,15 @@ package com.gmail.nerdx86.MiningToolKit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -17,7 +21,6 @@ public class MiningInventory extends ToolBaseObject{
 	public Map<String, List<Inventory>> inventoryMap = new HashMap<String, List<Inventory>>();
 	public MiningInventory(MiningToolKit aPlugin) {
 		super(aPlugin);
-		// TODO Auto-generated constructor stub
 	}
 
  
@@ -25,6 +28,9 @@ public class MiningInventory extends ToolBaseObject{
 		String inventoryName="";
 		String inventoryKey="";
 		int firstArg=0;
+		if ((args.length>0) && args[0].equalsIgnoreCase("classify")){
+			return plugin.blockDissolver.processCommandClassify(aPlayer, args);
+		}
 		if ((args.length>firstArg) && args[firstArg].equalsIgnoreCase("shared")){
 			inventoryName=" "+args[firstArg];
 			inventoryKey="_share_";
@@ -53,7 +59,7 @@ public class MiningInventory extends ToolBaseObject{
 				}
 			}*/
 		}else if ((args.length>firstArg) && args[firstArg].equalsIgnoreCase("sort")){
-
+			return doSort(aPlayer,inventoryList);
 		}else if ((args.length>firstArg) && args[firstArg].equalsIgnoreCase("buildchests")){
 
 		}
@@ -142,6 +148,62 @@ public class MiningInventory extends ToolBaseObject{
 			}
 		}
 		aInventoryList.clear();
+		return true;
+	}
+
+	protected boolean doSort(Player aPlayer, List<Inventory> aInventoryList){
+		List<ItemStack> priorityItems=new ArrayList<ItemStack>();
+		List<ItemStack> normalItems=new ArrayList<ItemStack>();
+		List<ItemStack> surplusItems=new ArrayList<ItemStack>();
+		
+		HashSet<Material> disposeBlocks=plugin.blockDissolver.getDisposeBlocks(aPlayer);
+		HashSet<Material> surplusBlocks=plugin.blockDissolver.getSurplusBlocks(aPlayer);
+		HashSet<Material> priorityBlocks=plugin.blockDissolver.getPriorityBlocks(aPlayer);
+
+		for (Inventory inventory:aInventoryList){
+			for (ItemStack item:inventory){
+				if (item!=null){
+					if (!disposeBlocks.contains(item.getType())){
+						if (surplusBlocks.contains(item.getType())){
+							surplusItems.add(item);
+						}else if (priorityBlocks.contains(item.getType())){
+							priorityItems.add(item);
+						}else{
+							normalItems.add(item);	
+						}
+					}
+				}
+			}
+		}
+		aInventoryList.clear();
+		Collections.sort(surplusItems, new Comparator<ItemStack>() {
+	        public int compare(ItemStack i1, ItemStack i2) {
+	        	if (i1.getType()==i2.getType()) {
+	        		return Integer.compare(i2.getAmount(), i1.getAmount()); 
+	        	}
+	            return i2.getType().compareTo(i1.getType());
+	        }
+	    });
+		Collections.sort(normalItems, new Comparator<ItemStack>() {
+	        public int compare(ItemStack i1, ItemStack i2) {
+	        	if (i1.getType()==i2.getType()) {
+	        		return Integer.compare(i2.getAmount(), i1.getAmount()); 
+	        	}
+	            return i2.getType().compareTo(i1.getType());
+	        }
+	    });
+		Collections.sort(priorityItems, new Comparator<ItemStack>() {
+	        public int compare(ItemStack i1, ItemStack i2) {
+	        	if (i1.getType()==i2.getType()) {
+	        		return Integer.compare(i2.getAmount(), i1.getAmount()); 
+	        	}
+	            return i2.getType().compareTo(i1.getType());
+	        }
+	    });
+		//TODO Sorting is not working 100%!!  Need to debug!
+		addItems(aPlayer, aInventoryList, priorityItems);
+		addItems(aPlayer, aInventoryList, normalItems);
+		addItems(aPlayer, aInventoryList, surplusItems);
 		return true;
 	}
 

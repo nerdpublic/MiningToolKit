@@ -8,6 +8,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.util.Vector;
 
 
 public class AutoMiner extends ToolBaseObject{
@@ -35,6 +37,24 @@ public class AutoMiner extends ToolBaseObject{
 		return true;
 	}
 
+	public boolean processCommandMiningLaser(Player aPlayer, String[] args){
+		AutoMinerConfiguration autoMinerConfiguration=getAutoMinerConfiguration(aPlayer);
+		if (args.length > 0){
+			autoMinerConfiguration.miningLaserDistance=Math.min(Integer.parseInt(args[0]),65);
+		}
+		else{
+			if (autoMinerConfiguration.miningLaserDistance==0){
+				autoMinerConfiguration.miningLaserDistance=8;
+			}
+			else{
+				autoMinerConfiguration.miningLaserDistance=0;
+			}
+		}
+		autoMinerConfigurationMap.put(aPlayer.getName(),autoMinerConfiguration);
+		aPlayer.sendMessage("mining laser distance set to "+autoMinerConfiguration.miningLaserDistance);
+		return true;
+	}
+
 	public boolean processCommandToTheSky(Player aPlayer, String[] args){
 		AutoMinerConfiguration autoMinerConfiguration=getAutoMinerConfiguration(aPlayer);
 		if (args.length > 0){
@@ -46,6 +66,25 @@ public class AutoMiner extends ToolBaseObject{
 		autoMinerConfigurationMap.put(aPlayer.getName(),autoMinerConfiguration);
 		aPlayer.sendMessage("tothesky set to "+autoMinerConfiguration.enableToTheSky);
 		return true;
+	}
+
+	public void doMiningLaser(PlayerMoveEvent event, Player aPlayer, AutoMinerConfiguration anAutoMinerConfiguration) {
+		int distance=anAutoMinerConfiguration.miningLaserDistance;
+		if (distance>0){
+			Location start = aPlayer.getEyeLocation();
+			Vector direction = start.getDirection();
+			direction.normalize();
+			Location currentLocation = start.clone().add(direction);
+			
+			while (start.distance(currentLocation)<distance) {
+				//plugin.getLogger().info("next "+nextLocation);
+				Block currentBlock = currentLocation.getBlock();
+				if (!currentBlock.isEmpty()) {
+					plugin.blockDissolver.addBlock(aPlayer, currentBlock, distance);
+				}
+				currentLocation.add(direction);
+			}
+		}
 	}
 
 	public void doAutoMiner(PlayerMoveEvent event, Player aPlayer, AutoMinerConfiguration anAutoMinerConfiguration) {
@@ -113,6 +152,7 @@ public class AutoMiner extends ToolBaseObject{
 		Player player = event.getPlayer();
 		AutoMinerConfiguration autoMinerConfiguration=getAutoMinerConfiguration(player);
 		doAutoMiner(event, player, autoMinerConfiguration);
+		doMiningLaser(event, player, autoMinerConfiguration);
 		doToTheSky(event, player, autoMinerConfiguration);
 	}
 

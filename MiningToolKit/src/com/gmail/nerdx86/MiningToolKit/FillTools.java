@@ -28,7 +28,7 @@ public class FillTools extends ToolBaseObject{
 	{
 		HashSet<Block> blocksFound=new HashSet<Block>();
 		List<Location> locationsToProcess = new LinkedList<Location>();
-		plugin.getLogger().info("processCommandMakeALake has been invoked!");
+		//plugin.getLogger().info("processCommandMakeALake has been invoked!");
 		Location playerFeet=aPlayer.getLocation();
 		playerFeet.setY(playerFeet.getY() - 1);
 		//plugin.getLogger().info("playerFeet:"+playerFeet);
@@ -72,7 +72,7 @@ public class FillTools extends ToolBaseObject{
 			Block block=iterator.next();
 			block.setType(Material.WATER);
 		}
-		plugin.getLogger().info("processCommandMakeALake is Complete!");
+		//plugin.getLogger().info("processCommandMakeALake is Complete!");
 		return true;
 	}
 	/*TNTPrimed tnt = player.getEyeLocation().getWorld().spawn(

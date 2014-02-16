@@ -59,6 +59,7 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 
 		blockDissolver.runTaskTimer(this, 0, 1);
 		nanoDissolver.runTaskTimer(this, 0, 1);
+		miningInventory.loadMI();
 		try{
 		  if (!getDataFolder().exists()) {
 		    getDataFolder().mkdir();
@@ -91,6 +92,8 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 
 	public void onDisable(){
 		getLogger().info("onDisable has been invoked!");
+		miningInventory.saveMI();
+
 		try{
 			//String path = getDataFolder() + File.separator + "miningInventory.bin";
 			  // if the directory does not exist, create it

@@ -79,7 +79,7 @@ public class AutoMiner extends ToolBaseObject{
 				//plugin.getLogger().info("next "+nextLocation);
 				Block currentBlock = blockIterator.next();
 				if (!currentBlock.isEmpty()) {
-					plugin.blockDissolver.addBlock(aPlayer, currentBlock, distance);
+					plugin.blockDissolver.addBlock(aPlayer, currentBlock, 1);
 				}
 			}
 		}

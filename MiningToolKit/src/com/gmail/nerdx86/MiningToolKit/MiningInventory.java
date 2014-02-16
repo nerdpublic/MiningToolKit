@@ -234,14 +234,9 @@ public class MiningInventory extends ToolBaseObject {
 		Collections.sort(priorityItems, new ItemStackComparator());
 		Collections.sort(normalItems, new ItemStackComparator());
 		Collections.sort(surplusItems, new ItemStackComparator());
-		//plugin.miningUtils.logToTextFile("**Priority:"+priorityItems);
-		//plugin.miningUtils.logToTextFile("**Normal:"+normalItems);
-		//plugin.miningUtils.logToTextFile("**Surplus:"+surplusItems);
-		// TODO Sorting is not working 100%!! Need to debug!
 		addItems(aPlayer, aInventoryList, priorityItems);
 		addItems(aPlayer, aInventoryList, normalItems);
 		addItems(aPlayer, aInventoryList, surplusItems);
-		//plugin.miningUtils.logToTextFile("**All:"+aInventoryList);
 		return true;
 	}
 
@@ -290,6 +285,8 @@ public class MiningInventory extends ToolBaseObject {
 				}
 				miConfiguration.set(currentName+".MiningInventory", itemsToSave);
 			}
+			
+			plugin.blockDissolver.saveBD(miConfiguration, players);
 			miConfiguration.set("MiningInventories", Arrays.asList(players.toArray()));
 			miConfiguration.save(new File(dataFolder + File.separator + "MiningInventory", "SaveData.yml"));
 
@@ -314,6 +311,7 @@ public class MiningInventory extends ToolBaseObject {
 			
 			YamlConfiguration miConfiguration = YamlConfiguration.loadConfiguration(new File(dataFolder + File.separator + "MiningInventory", "SaveData.yml"));
 			List<String> names = miConfiguration.getStringList("MiningInventories");
+			plugin.blockDissolver.loadBD(miConfiguration, names);
 			Iterator<String> nameIterator=names.iterator();
 			while (nameIterator.hasNext()){
 				String currentName=nameIterator.next();

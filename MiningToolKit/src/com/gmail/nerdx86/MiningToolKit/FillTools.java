@@ -36,7 +36,7 @@ public class FillTools extends ToolBaseObject{
 		locationsToProcess.add(playerFeet);
 		while (!locationsToProcess.isEmpty()){
 			Location currentLocation=locationsToProcess.remove(0);
-			BlockIterator blockIterator=new BlockIterator(currentLocation, 0, 140);
+			BlockIterator blockIterator=new BlockIterator(currentLocation, 0, 500);
 			boolean foundSide=false;
 			while (blockIterator.hasNext()){
 				Block currentBlock=blockIterator.next();

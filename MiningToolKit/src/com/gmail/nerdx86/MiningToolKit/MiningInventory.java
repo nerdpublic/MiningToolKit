@@ -145,20 +145,24 @@ public class MiningInventory extends ToolBaseObject {
 		Collection<ItemStack> itemsToAdd = new ArrayList<ItemStack>(
 				aItemStackCollection);
 		if (!aItemStackCollection.isEmpty()) {
-			for (Inventory inventory : inventoryList) {
-				remainingItems = inventory.addItem(itemsToAdd
-						.toArray(new ItemStack[itemsToAdd.size()]));
-				itemsToAdd = remainingItems.values();
-				if (itemsToAdd.isEmpty())
-					break;
-			}
-			while (!itemsToAdd.isEmpty()) {
-				Inventory inventory = plugin.getServer().createInventory(
-						aPlayer, 54 /* 9*9*9*9 */);
-				inventoryList.add(inventory);
-				remainingItems = inventory.addItem(itemsToAdd
-						.toArray(new ItemStack[itemsToAdd.size()]));
-				itemsToAdd = remainingItems.values();
+			Iterator<ItemStack> itemStackIterator = aItemStackCollection.iterator();
+			while (itemStackIterator.hasNext()){
+				ItemStack itemToAdd=itemStackIterator.next();
+				if (itemToAdd!=null){
+					boolean tmpAdded=false;
+					for (Inventory inventory : inventoryList) {
+						remainingItems = inventory.addItem(itemToAdd);
+						if (remainingItems.isEmpty()){
+							tmpAdded=true;
+							break;
+						}
+					}
+					if (!tmpAdded){
+						Inventory inventory = plugin.getServer().createInventory(aPlayer, 54);
+						inventoryList.add(inventory);
+						inventory.addItem(itemToAdd);
+					}
+				}
 			}
 		}
 		return true;
@@ -189,6 +193,16 @@ public class MiningInventory extends ToolBaseObject {
 		return true;
 	}
 
+	public class ItemStackComparator implements Comparator<ItemStack>{
+	    @Override
+		public int compare(ItemStack i1, ItemStack i2) {
+			if (i1.getType() == i2.getType()) {
+				return Integer.compare(i2.getAmount(), i1.getAmount());
+			}
+			return i2.getType().compareTo(i1.getType());
+		}
+	} 
+
 	protected boolean doSort(Player aPlayer, List<Inventory> aInventoryList) {
 		List<ItemStack> priorityItems = new ArrayList<ItemStack>();
 		List<ItemStack> normalItems = new ArrayList<ItemStack>();
@@ -217,34 +231,17 @@ public class MiningInventory extends ToolBaseObject {
 			}
 		}
 		aInventoryList.clear();
-		Collections.sort(surplusItems, new Comparator<ItemStack>() {
-			public int compare(ItemStack i1, ItemStack i2) {
-				if (i1.getType() == i2.getType()) {
-					return Integer.compare(i2.getAmount(), i1.getAmount());
-				}
-				return i2.getType().compareTo(i1.getType());
-			}
-		});
-		Collections.sort(normalItems, new Comparator<ItemStack>() {
-			public int compare(ItemStack i1, ItemStack i2) {
-				if (i1.getType() == i2.getType()) {
-					return Integer.compare(i2.getAmount(), i1.getAmount());
-				}
-				return i2.getType().compareTo(i1.getType());
-			}
-		});
-		Collections.sort(priorityItems, new Comparator<ItemStack>() {
-			public int compare(ItemStack i1, ItemStack i2) {
-				if (i1.getType() == i2.getType()) {
-					return Integer.compare(i2.getAmount(), i1.getAmount());
-				}
-				return i2.getType().compareTo(i1.getType());
-			}
-		});
+		Collections.sort(priorityItems, new ItemStackComparator());
+		Collections.sort(normalItems, new ItemStackComparator());
+		Collections.sort(surplusItems, new ItemStackComparator());
+		//plugin.miningUtils.logToTextFile("**Priority:"+priorityItems);
+		//plugin.miningUtils.logToTextFile("**Normal:"+normalItems);
+		//plugin.miningUtils.logToTextFile("**Surplus:"+surplusItems);
 		// TODO Sorting is not working 100%!! Need to debug!
 		addItems(aPlayer, aInventoryList, priorityItems);
 		addItems(aPlayer, aInventoryList, normalItems);
 		addItems(aPlayer, aInventoryList, surplusItems);
+		//plugin.miningUtils.logToTextFile("**All:"+aInventoryList);
 		return true;
 	}
 

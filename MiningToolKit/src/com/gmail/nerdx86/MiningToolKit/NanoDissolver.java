@@ -1,5 +1,6 @@
 package com.gmail.nerdx86.MiningToolKit;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,16 +14,17 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.gmail.nerdx86.MiningToolKit.AutoMiner.AutoMinerConfiguration;
 
 
-public class NanoDissolver extends ToolBaseObject{
+public class NanoDissolver extends BukkitRunnable{
+	public MiningToolKit plugin;
 	public List<NanoDissolveOperation> dissolveOperations = new LinkedList<NanoDissolveOperation>();
 	public NanoDissolver(MiningToolKit aPlugin) {
-		super(aPlugin);
-		// TODO Auto-generated constructor stub
-	}
+		plugin=aPlugin;
+}
 
 	public boolean processCommandNanoDissolve(Player aPlayer, String[] args){
 		Integer radius=10; 
@@ -68,9 +70,9 @@ public class NanoDissolver extends ToolBaseObject{
 				//logToTextFile("x:,"+xStart+","+xStop+",y:,"+yStart+","+yStop+",z:,"+zStart+","+zStop+","+compareRadius);
 			}
 		}
-		public boolean doNanoDissolve(Player aPlayer) {
+		public boolean doNanoDissolve() {
 			double distance=0;
-			int blocksToDissolve=5000;
+			long startMS=(new Date().getTime());
 			if (radius>0){
 				while ((yPoint<=yStop)){
 					while ((xPoint<=xStop)){
@@ -83,8 +85,9 @@ public class NanoDissolver extends ToolBaseObject{
 								distance=head.distance(currentBlock.getLocation());
 							}
 							if ((!currentBlock.isEmpty()) && (distance<=compareRadius)) {
-								if (plugin.blockDissolver.addBlock(aPlayer, currentBlock, distance)){
-									if (--blocksToDissolve<=0) 
+								if (plugin.blockDissolver.addBlock(player, currentBlock, distance)){
+									long nowMS=new Date().getTime();
+									if ((nowMS<startMS) || (nowMS>startMS+1))
 									{
 										zPoint++; //don't dissolve this point again
 										return false;
@@ -107,15 +110,19 @@ public class NanoDissolver extends ToolBaseObject{
 	}
 
 
-	public void doPlayerMoveEvent(PlayerMoveEvent event){
-		Player player = event.getPlayer();
+	@Override
+    public void run() {
 		if (!dissolveOperations.isEmpty()){
+			long startMS=(new Date().getTime());
 			Iterator<NanoDissolveOperation> it = dissolveOperations.iterator();
 			while (it.hasNext()) {
-				if (it.next().doNanoDissolve(player)) {
+				if (it.next().doNanoDissolve()) {
 					it.remove();
 				}
+				long nowMS=new Date().getTime();
+				if ((nowMS<startMS) || (nowMS>startMS+2))
+					break;
 			}
 		}
-	}
+    }
 }

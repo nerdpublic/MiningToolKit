@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
 
@@ -71,18 +72,15 @@ public class AutoMiner extends ToolBaseObject{
 	public void doMiningLaser(PlayerMoveEvent event, Player aPlayer, AutoMinerConfiguration anAutoMinerConfiguration) {
 		int distance=anAutoMinerConfiguration.miningLaserDistance;
 		if (distance>0){
-			Location start = aPlayer.getEyeLocation();
-			Vector direction = start.getDirection();
-			direction.normalize();
-			Location currentLocation = start.clone().add(direction);
+			//aPlayer.sendMessage("mining laser firing ");
+			BlockIterator blockIterator=new BlockIterator(aPlayer, distance);
 			
-			while (start.distance(currentLocation)<distance) {
+			while (blockIterator.hasNext()) {
 				//plugin.getLogger().info("next "+nextLocation);
-				Block currentBlock = currentLocation.getBlock();
+				Block currentBlock = blockIterator.next();
 				if (!currentBlock.isEmpty()) {
 					plugin.blockDissolver.addBlock(aPlayer, currentBlock, distance);
 				}
-				currentLocation.add(direction);
 			}
 		}
 	}

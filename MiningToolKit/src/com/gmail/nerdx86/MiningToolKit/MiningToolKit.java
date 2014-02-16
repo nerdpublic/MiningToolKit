@@ -27,7 +27,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,6 +38,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import com.avaje.ebeaninternal.server.lib.resource.DirectoryFinder;
 
 
 public final class MiningToolKit extends JavaPlugin implements Listener{
@@ -46,12 +50,32 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 	public NanoDissolver nanoDissolver = new NanoDissolver(this);
 	public AutoMiner autoMiner = new AutoMiner(this);
 	public AutoLighter autoLighter = new AutoLighter(this);
-
+	public FillTools fillTools = new FillTools(this);
 
 	public void onEnable(){
 		getLogger().info("onEnable has been invoked!");
 		PluginManager PluginManager = getServer().getPluginManager();
 		PluginManager.registerEvents(this, this);
+
+		blockDissolver.runTaskTimer(this, 0, 1);
+		nanoDissolver.runTaskTimer(this, 0, 1);
+		try{
+		  if (!getDataFolder().exists()) {
+		    getDataFolder().mkdir();
+		  }
+		  //Directory diretory; 
+		  //String path = getDataFolder() + File.separator + "miningInventory.bin";
+		  //File file = new File(path);
+			
+		}
+		catch(Exception e){
+			//handle the exception
+			e.printStackTrace();
+		}
+		//BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+        //scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
+            //Do something
+        //}, 20L);
 		/*try{
 			String path = getDataFolder() + File.separator + "miningInventory.bin";
 			File file = new File(path);
@@ -95,8 +119,7 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 			}else if (cmd.getName().equalsIgnoreCase("tothesky") || cmd.getName().equalsIgnoreCase("tts")){ // If the player typed /tothesky then do the following...
 				return autoMiner.processCommandToTheSky(player, args);
 			}else if (cmd.getName().equalsIgnoreCase("makealake")){ // If the player typed /makealake then do the following...
-				//FillTools
-				return true;
+				return fillTools.processCommandMakeALake(player, args);
 			}else if (cmd.getName().equalsIgnoreCase("tothere") || cmd.getName().equalsIgnoreCase("tt")){ // If the player typed /tothere then do the following...
 				return miningOperations.processCommandToThere(player, args);
 			}else if (cmd.getName().equalsIgnoreCase("mininginventory") || cmd.getName().equalsIgnoreCase("mi")){
@@ -112,10 +135,8 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 		//getLogger().info("onPlayerMove has been invoked!");
-		nanoDissolver.doPlayerMoveEvent(event);
 		autoMiner.doPlayerMoveEvent(event);
 		autoLighter.doPlayerMoveEvent(event);
-		blockDissolver.doPlayerMoveEvent(event);
 	}
 
 	@EventHandler
@@ -123,4 +144,16 @@ public final class MiningToolKit extends JavaPlugin implements Listener{
 		//getLogger().info("onBlockBreakEvent has been invoked!");
 	}
 
+	@EventHandler
+	public void onJoin(PlayerJoinEvent event){
+		
+	}
+
+	@EventHandler
+	public void onQuit(PlayerQuitEvent event){
+		
+	}
+	
+
+	
 }

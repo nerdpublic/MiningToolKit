@@ -3,6 +3,7 @@ package com.gmail.nerdx86.MiningToolKit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,21 +18,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.gmail.nerdx86.MiningToolKit.AutoMiner.AutoMinerConfiguration;
 import com.gmail.nerdx86.MiningToolKit.NanoDissolver.NanoDissolveOperation;
 
 
-public class BlockDissolver extends ToolBaseObject{
-	public Queue<BlockToDissolve> blocksToDissolve = new PriorityQueue<BlockToDissolve>(10, new BlockToDissolveComparator());
+public class BlockDissolver extends BukkitRunnable{
+	public MiningToolKit plugin;
+	
+    public Queue<BlockToDissolve> blocksToDissolve = new PriorityQueue<BlockToDissolve>(10, new BlockToDissolveComparator());
 	public Map<String, HashSet<Material>> ignoreBlocksMap = new HashMap<String, HashSet<Material>>();
 	public Map<String, HashSet<Material>> priorityBlocksMap = new HashMap<String, HashSet<Material>>();
 	public Map<String, HashSet<Material>> surplusBlocksMap = new HashMap<String, HashSet<Material>>();
 	public Map<String, HashSet<Material>> disposeBlocksMap = new HashMap<String, HashSet<Material>>();
 
 	public BlockDissolver(MiningToolKit aPlugin) {
-		super(aPlugin);
-		// TODO Auto-generated constructor stub
+			plugin=aPlugin;
 	}
 
 	public boolean addBlock(Player aPlayer, Block aBlock, double aDistance){
@@ -44,15 +47,7 @@ public class BlockDissolver extends ToolBaseObject{
 		return true; //Block was handled
 	}
 
-	public void doBlockDissolve(PlayerMoveEvent event) {
-		int i=500;
-		while ((i>0) && (!blocksToDissolve.isEmpty())){
-			//getLogger().info("!DissolveBlocks.isEmpty");
-			blocksToDissolve.poll().doDissolve();
-			i--;
-		}
-	}
-
+	
 	public HashSet<Material> getIgnoreBlocks(Player aPlayer){
 		HashSet<Material> ignoreBlocks=ignoreBlocksMap.get(aPlayer.getName());
 		if (ignoreBlocks==null){
@@ -94,9 +89,6 @@ public class BlockDissolver extends ToolBaseObject{
 	}
 
 
-	public void doPlayerMoveEvent(PlayerMoveEvent event){
-		doBlockDissolve(event);	
-	}
 
 	public boolean processCommandClassify(Player aPlayer, String[] args){
 		if (args.length==1){
@@ -220,6 +212,18 @@ public class BlockDissolver extends ToolBaseObject{
 				return 1;
 			}
 			return 0;
+		}
+	}
+
+	@Override
+    public void run() {
+		long startMS=(new Date().getTime());
+		while (!blocksToDissolve.isEmpty()){
+			//getLogger().info("!DissolveBlocks.isEmpty");
+			blocksToDissolve.poll().doDissolve();
+			long nowMS=new Date().getTime();
+			if ((nowMS<startMS) || (nowMS>startMS+1))
+				break;
 		}
 	}
 }
